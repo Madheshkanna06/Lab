@@ -1,0 +1,66 @@
+clc; clear;
+
+% Input string
+x = 'inf';
+len = length(x);
+
+% Unique symbols and their probabilities
+u = unique(x);
+p = histc(x, u) / len;
+
+% Display results
+disp(['Length of string: ', num2str(len)]);
+disp('Unique characters:'), disp(u)
+disp('Frequencies:'), disp(histc(x, u))
+disp('Probabilities:'), disp(p)
+
+% Entropy calculation
+H = -sum(p .* log2(p));
+disp(['Information Entropy (H): ', num2str(H)]);
+
+% Huffman coding
+symbols = cellstr(u');
+[~, order] = sort(p);
+nodes = symbols(order);
+freqs = p(order);
+
+while length(freqs) > 1
+    [freqs, idx] = sort(freqs);
+    newNode = {nodes{1}, nodes{2}};
+    nodes = [{newNode}, nodes(3:end)];
+    freqs = [sum(freqs(1:2)), freqs(3:end)];
+end
+
+codes = genHuff(nodes{1}, '');
+disp('Huffman Codes:')
+for i = 1:length(u)
+    fprintf('%s : %s\n', u(i), codes(u(i)));
+end
+
+% Recursive Huffman code generator
+function codes = genHuff(node, prefix)
+    codes = containers.Map();
+    if iscell(node)
+        left = genHuff(node{1}, [prefix '0']);
+        right = genHuff(node{2}, [prefix '1']);
+        codes = [left; right];
+    else
+        codes(node) = prefix;
+    end
+end
+
+
+output:
+Length of string: 3
+Unique characters:
+    f   i   n
+Frequencies:
+    1   1   1
+Probabilities:
+    0.3333   0.3333   0.3333
+Information Entropy (H): 1.585
+Huffman Codes:
+f : 00
+i : 01
+n : 1
+
